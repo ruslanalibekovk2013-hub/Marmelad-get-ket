@@ -29,6 +29,7 @@
   чтобы ключ выдавался один раз на аккаунт, а не бесконечно.
 """
 
+import os
 import time
 import requests
 from flask import Flask, jsonify, request
@@ -37,8 +38,11 @@ app = Flask(__name__)
 
 # ---------------- НАСТРОЙКИ ----------------
 
-# Твой Management API ключ с openrouter.ai/settings/keys ("Management Keys")
-MANAGEMENT_API_KEY = "sk-or-v1-ВСТАВЬ-СЮДА-СВОЙ-MANAGEMENT-КЛЮЧ"
+# Твой Management API ключ с openrouter.ai/settings/keys ("Management Keys").
+# ВАЖНО: ключ НЕ хранится в коде — он берётся из переменной окружения
+# MANAGEMENT_API_KEY, которую нужно задать в настройках хостинга (Render:
+# Environment Variables). Так ключ не попадает в открытый репозиторий на GitHub.
+MANAGEMENT_API_KEY = os.environ.get("MANAGEMENT_API_KEY", "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")
 
 # Лимит в долларах на каждый выданный ключ (защита от слива баланса).
 # Поставь None, если лимит не нужен.
@@ -77,6 +81,11 @@ def _cors(resp):
 def get_key():
     if request.method == "OPTIONS":
         return _cors(app.make_default_options_response())
+
+    if not MANAGEMENT_API_KEY:
+        return _cors(jsonify({
+            "error": "MANAGEMENT_API_KEY не задан на сервере (переменная окружения пуста)."
+        })), 500
 
     ip = request.headers.get("X-Forwarded-For", request.remote_addr) or "unknown"
 
