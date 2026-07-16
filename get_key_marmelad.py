@@ -100,7 +100,7 @@ def get_key():
 
     try:
         response = requests.post(
-            "https://openrouter.ai/api/v1/keys/",
+            "https://openrouter.ai/api/v1/keys",
             headers={
                 "Authorization": f"Bearer {MANAGEMENT_API_KEY}",
                 "Content-Type": "application/json",
